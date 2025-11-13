@@ -59,14 +59,14 @@
         font-weight: 600;
       }
       input.translation-input {
-        width: 60%;
+        width: 30%;
         box-sizing: border-box;
         padding: 0.25rem 0.35rem;
         font-size: 0.9rem;
       }
       .meaning-cell {
         line-height: 1.8;
-        width: 30%;
+        width: 40%;
       }
 
       .ref-list {
@@ -164,6 +164,12 @@
       </p>
 
       <table>
+        <colgroup>
+          <col style="width: 10%" />
+          <col style="width: 20%" />
+          <col style="width: 40%" />
+          <col style="width: 30%" />
+        </colgroup>
         <thead>
           <tr>
             <th>Headword</th>
@@ -190,6 +196,7 @@
       let headwordToEntry = {};
       const tooltipLayers = [];
       let tooltipHandlersInstalled = false;
+      let HEADWORD_LIST = [];
 
       function isUpperLike(word) {
         return /^[A-Z0-9]+$/.test(word);
@@ -303,9 +310,7 @@
 
       function renderMeaningHtml(text, translations) {
         let result = escapeHtml(text);
-        const headwords = ENTRIES.map((e) => e.headword).sort(
-          (a, b) => b.length - a.length
-        );
+        const headwords = HEADWORD_LIST;
 
         headwords.forEach((hw) => {
           const translation = translations[hw] || "";
@@ -331,6 +336,7 @@
 
       function buildTable() {
         const tbody = document.getElementById("dict-body");
+        tbody.innerHTML = "";
         const userData = loadUserData();
         computeReferences();
 
@@ -371,6 +377,7 @@
           const tdMeaning = document.createElement("td");
           tdMeaning.className = "meaning-cell";
           tdMeaning.dataset.entryId = entry.id;
+          tdMeaning.textContent = entry.meaning;
           tr.appendChild(tdMeaning);
 
           const tdRef = document.createElement("td");
@@ -381,8 +388,11 @@
           tbody.appendChild(tr);
         });
 
-        updateAllMeaningsFromInputs();
         renderReferences();
+
+        requestAnimationFrame(() => {
+          updateAllMeaningsFromInputs();
+        });
       }
 
       function collectTranslationsFromInputs() {
@@ -591,6 +601,9 @@
 
         headwordToEntry = {};
         ENTRIES.forEach((e) => (headwordToEntry[e.headword] = e));
+        HEADWORD_LIST = ENTRIES.map((e) => e.headword).sort(
+          (a, b) => b.length - a.length
+        );
 
         buildTable();
         attachTooltipHandlers();
