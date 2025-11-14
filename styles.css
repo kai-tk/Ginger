@@ -1,0 +1,147 @@
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color-scheme: light dark;
+}
+body {
+  margin: 0;
+  padding: 0;
+  background: #f3f4f6;
+}
+.wrapper {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.6rem;
+}
+.sub {
+  margin: 0 0 1rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.12);
+  table-layout: fixed;
+}
+thead {
+  background: #e5e7eb;
+}
+th,
+td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+  font-size: 0.9rem;
+}
+th {
+  text-align: left;
+  white-space: nowrap;
+}
+tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+.headword {
+  font-weight: 600;
+}
+input.translation-input {
+  width: 30%;
+  box-sizing: border-box;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.9rem;
+}
+.meaning-cell {
+  line-height: 1.8;
+  width: 40%;
+}
+
+.ref-list {
+  font-size: 0.8rem;
+  color: #4b5563;
+  width: 20%;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.ref-chip {
+  display: inline-block;
+  padding: 0.05rem 0.3rem;
+  margin: 0 0.15rem 0.15rem 0;
+  border-radius: 9999px;
+  background: #e5e7eb;
+  cursor: pointer;
+}
+.dict-word {
+  position: relative;
+  cursor: help;
+  text-decoration: underline dotted #9ca3af;
+  text-underline-offset: 0.2em;
+}
+ruby {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  white-space: nowrap;
+  margin: 0 0.05em;
+}
+ruby > .base-word {
+  order: 0;
+}
+ruby > rt {
+  order: 1;
+  font-size: 0.6em;
+  line-height: 1.1;
+  padding: 0.05em 0.2em 0;
+  min-width: 1.5em;
+  display: inline-block;
+  border-bottom: 1px dashed #9ca3af;
+}
+ruby > rt.ruby-empty {
+  opacity: 0.7;
+}
+.tooltip-box {
+  position: fixed;
+  z-index: 9999;
+  max-width: 320px;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.8rem;
+  background: rgba(17, 24, 39, 0.96);
+  color: #f9fafb;
+  border-radius: 0.4rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.4);
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.08s ease-out, transform 0.08s ease-out;
+}
+.tooltip-headword {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+.tooltip-body {
+  margin-top: 0.1rem;
+}
+.tooltip-box.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.footnote {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+.translation-locked {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  font-style: italic;
+}
