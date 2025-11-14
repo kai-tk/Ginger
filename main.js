@@ -129,11 +129,12 @@ function computeReferences() {
 
       const token = raw.replace(/^[^\w]+|[^\w]+$/g, "");
       if (!token) continue;
-      if (SPECIAL_HEADWORDS.includes(raw)) continue;
 
       const B = map[token];
       if (!B) continue;
       if (B === A) continue;
+
+      if (SPECIAL_HEADWORDS.includes(B.headword)) continue;
 
       if (!B._refs.includes(A.headword)) {
         B._refs.push(A.headword);
