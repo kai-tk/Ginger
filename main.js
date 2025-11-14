@@ -446,24 +446,92 @@ function attachTooltipHandlers() {
 }
 
 async function loadDictionary() {
-  console.log("Parsing embedded CSV...");
   ENTRIES = parseCsv(window.DICTIONARY_CSV);
 
-  console.log("Building headword map...");
   headwordToEntry = {};
   ENTRIES.forEach((e) => (headwordToEntry[e.headword] = e));
   HEADWORD_LIST = ENTRIES.map((e) => e.headword).sort(
     (a, b) => b.length - a.length
   );
 
-  console.log("Build table...");
   buildTable();
-
-  console.log("Attach tooltip...");
   attachTooltipHandlers();
-  console.log("Ready");
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
   loadDictionary();
+});
+
+function downloadUserData() {
+  const data = loadUserData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "dictionary-translations.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.key === "s") {
+    e.preventDefault();
+    downloadUserData();
+  }
+});
+
+function importUserData(jsonText) {
+  try {
+    const obj = JSON.parse(jsonText);
+    if (typeof obj !== "object" || obj === null) return alert("Invalid file.");
+    saveUserData(obj);
+    updateAllInputsFromUserData();
+    updateAllMeaningsFromInputs();
+    alert("Translations imported.");
+  } catch (e) {
+    alert("Failed to load JSON.");
+  }
+}
+
+function updateAllInputsFromUserData() {
+  const data = loadUserData();
+  document.querySelectorAll(".translation-input").forEach((input) => {
+    const id = input.dataset.entryId;
+    input.value = data[id]?.translation || "";
+  });
+}
+
+document.getElementById("import-button").addEventListener("click", () => {
+  document.getElementById("import-file").click();
+});
+
+document.getElementById("import-file").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    importUserData(ev.target.result);
+  };
+  reader.readAsText(file);
+});
+
+window.addEventListener("dragover", (e) => {
+  e.preventDefault();
+});
+
+window.addEventListener("drop", (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    importUserData(ev.target.result);
+  };
+  reader.readAsText(file);
 });
