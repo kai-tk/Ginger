@@ -5,6 +5,24 @@ const tooltipLayers = [];
 let tooltipHandlersInstalled = false;
 let HEADWORD_LIST = [];
 
+const MEANING_FILTER_WORDS = [
+  { id: "a", label: "a." },
+  { id: "bu", label: "bu." },
+  { id: "cj", label: "cj." },
+  { id: "e", label: "e." },
+  { id: "hh", label: "hh." },
+  { id: "i", label: "i." },
+  { id: "k", label: "k." },
+  { id: "p", label: "p." },
+  { id: "q", label: "q." },
+  { id: "r", label: "r." },
+  { id: "sj", label: "sj." },
+  { id: "y", label: "y." },
+];
+
+let meaningFilterSelected = new Set();
+let translationFilterMode = "all";
+
 function isUpperLike(word) {
   return /^[A-Z0-9]+$/.test(word);
 }
@@ -100,9 +118,10 @@ function parseCsv(text) {
 function computeReferences() {
   ENTRIES.forEach((entry) => {
     entry._refs = [];
+    entry._tokenSet = new Set();
   });
 
-  SPECIAL_HEADWORDS = [
+  const SPECIAL_HEADWORDS = [
     "a",
     "bu",
     "cj",
@@ -123,6 +142,7 @@ function computeReferences() {
     if (!A.meaning) continue;
 
     const tokens = A.meaning.split(/\s+/);
+    const tokenSet = new Set();
 
     for (const raw of tokens) {
       if (!raw) continue;
@@ -130,16 +150,20 @@ function computeReferences() {
       const token = raw.replace(/^[^\w]+|[^\w]+$/g, "");
       if (!token) continue;
 
+      const norm = token.toLowerCase();
+      tokenSet.add(norm);
+
       const B = map[token];
       if (!B) continue;
       if (B === A) continue;
-
       if (SPECIAL_HEADWORDS.includes(B.headword)) continue;
 
       if (!B._refs.includes(A.headword)) {
         B._refs.push(A.headword);
       }
     }
+
+    A._tokenSet = tokenSet;
   }
 }
 
@@ -227,6 +251,7 @@ function buildTable() {
         data[entry.id].translation = input.value;
         saveUserData(data);
         updateRubyForHeadword(entry.headword);
+        applyFilter();
       });
 
       tdTrans.appendChild(input);
@@ -251,6 +276,7 @@ function buildTable() {
 
   requestAnimationFrame(() => {
     updateAllMeaningsFromInputs();
+    applyFilter();
   });
 }
 
@@ -324,6 +350,76 @@ function renderReferences() {
       cell.appendChild(chip);
     });
   });
+}
+
+function applyFilter() {
+  const selectedWords = meaningFilterSelected;
+  const translationMode = translationFilterMode;
+
+  ENTRIES.forEach((entry) => {
+    const row = document.querySelector(`tr[data-entry-id="${entry.id}"]`);
+    if (!row) return;
+
+    let passMeaning = true;
+    if (selectedWords.size > 0) {
+      const tokenSet = entry._tokenSet || new Set();
+      passMeaning = [...selectedWords].some((w) => tokenSet.has(w));
+    }
+
+    let passTranslation = true;
+    if (translationMode !== "all") {
+      const input = row.querySelector(".translation-input");
+      const hasText = !!(input && input.value.trim());
+      if (translationMode === "filled") {
+        passTranslation = hasText;
+      } else if (translationMode === "empty") {
+        passTranslation = !hasText;
+      }
+    }
+
+    row.style.display = passMeaning && passTranslation ? "" : "none";
+  });
+}
+
+function handleFilterChange() {
+  meaningFilterSelected = new Set(
+    [...document.querySelectorAll(".filter-meaning-checkbox:checked")].map(
+      (cb) => cb.dataset.word
+    )
+  );
+
+  const radio = document.querySelector(
+    'input[name="filter-translation"]:checked'
+  );
+  translationFilterMode = radio ? radio.value : "all";
+
+  applyFilter();
+}
+
+function setupFilters() {
+  const container = document.getElementById("filter-meaning-words");
+  if (!container) return;
+
+  MEANING_FILTER_WORDS.forEach((w) => {
+    const label = document.createElement("label");
+    label.className = "filter-chip";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "filter-meaning-checkbox";
+    cb.dataset.word = w.id.toLowerCase();
+    cb.addEventListener("change", handleFilterChange);
+
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(" " + w.label));
+    container.appendChild(label);
+  });
+
+  document
+    .querySelectorAll('input[name="filter-translation"]')
+    .forEach((radio) => {
+      radio.addEventListener("change", handleFilterChange);
+    });
 }
 
 function initTooltipLayers() {
@@ -454,6 +550,7 @@ async function loadDictionary() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  setupFilters();
   loadDictionary();
 });
 

@@ -15,6 +15,29 @@
         Ctrl+S to save translations. Drop a JSON file to import translations.
       </p>
 
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span class="filter-label">Translation:</span>
+          <label class="filter-chip">
+            <input type="radio" name="filter-translation" value="all" checked />
+            All
+          </label>
+          <label class="filter-chip">
+            <input type="radio" name="filter-translation" value="filled" />
+            Filled
+          </label>
+          <label class="filter-chip">
+            <input type="radio" name="filter-translation" value="empty" />
+            Empty
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Meaning filter:</span>
+          <div id="filter-meaning-words" class="filter-meaning-list"></div>
+        </div>
+      </div>
+
       <table>
         <colgroup>
           <col style="width: 10%" />

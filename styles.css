@@ -145,3 +145,80 @@ ruby > rt.ruby-empty {
   font-size: 0.8rem;
   font-style: italic;
 }
+
+.filter-bar {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+
+  background: #e5e7eb;
+  color: #111827;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filter-bar-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.filter-chip input[type="checkbox"] {
+  margin: 0;
+}
+
+.filter-chip span {
+  line-height: 1;
+}
+
+.translation-filter-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.translation-filter-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+}
+
+.filter-meaning-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.filter-label {
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
