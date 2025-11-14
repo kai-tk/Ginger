@@ -226,8 +226,9 @@ function buildTable() {
         if (!data[entry.id]) data[entry.id] = {};
         data[entry.id].translation = input.value;
         saveUserData(data);
-        updateAllMeaningsFromInputs();
+        updateRubyForHeadword(entry.headword);
       });
+
       tdTrans.appendChild(input);
     }
     tr.appendChild(tdTrans);
@@ -273,6 +274,25 @@ function updateAllMeaningsFromInputs() {
     cell.innerHTML = renderMeaningHtml(entry.meaning, translations);
   });
   attachTooltipHandlers();
+}
+
+function updateRubyForHeadword(headword) {
+  const translations = collectTranslationsFromInputs();
+  const newRuby = translations[headword] || "";
+
+  // data-headword="headword" を持つ単語だけを対象にする
+  const selector = `.meaning-cell .dict-word[data-headword="${headword}"] rt.ruby-editable`;
+
+  const rtNodes = document.querySelectorAll(selector);
+  rtNodes.forEach((rt) => {
+    rt.textContent = newRuby;
+
+    if (newRuby) {
+      rt.classList.remove("ruby-empty");
+    } else {
+      rt.classList.add("ruby-empty");
+    }
+  });
 }
 
 function renderReferences() {
