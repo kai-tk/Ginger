@@ -144,29 +144,52 @@ function computeReferences() {
 }
 
 function renderMeaningHtml(text, translations) {
-  let result = escapeHtml(text);
-  const headwords = HEADWORD_LIST;
+  if (!text) return "";
 
-  headwords.forEach((hw) => {
+  const map = headwordToEntry;
+  const parts = [];
+
+  const tokens = text.split(/(\s+)/);
+
+  for (const raw of tokens) {
+    if (!raw) continue;
+
+    if (/^\s+$/.test(raw)) {
+      parts.push(escapeHtml(raw));
+      continue;
+    }
+
+    const core = raw.replace(/^[^\w]+|[^\w]+$/g, "");
+    if (!core) {
+      parts.push(escapeHtml(raw));
+      continue;
+    }
+
+    const entry = map[core];
+    if (!entry) {
+      parts.push(escapeHtml(raw));
+      continue;
+    }
+
+    const hw = entry.headword;
     const translation = translations[hw] || "";
-    const escapedHw = escapeHtml(hw);
-    const escapedTr = escapeHtml(translation);
-
     const rtClass = translation ? "" : " ruby-empty";
 
-    const replacement =
+    const escapedHw = escapeHtml(hw);
+    const escapedRaw = escapeHtml(raw);
+    const escapedTr = escapeHtml(translation);
+
+    parts.push(
       `<span class="dict-word" data-headword="${escapedHw}">` +
-      `<ruby>` +
-      `<span class="base-word">${escapedHw}</span>` +
-      `<rt class="ruby-editable${rtClass}">${escapedTr}</rt>` +
-      `</ruby>` +
-      `</span>`;
+        `<ruby>` +
+        `<span class="base-word">${escapedRaw}</span>` +
+        `<rt class="ruby-editable${rtClass}">${escapedTr}</rt>` +
+        `</ruby>` +
+        `</span>`
+    );
+  }
 
-    const re = new RegExp("\\b" + escapeRegExp(hw) + "\\b", "g");
-    result = result.replace(re, replacement);
-  });
-
-  return result;
+  return parts.join("");
 }
 
 function buildTable() {
@@ -292,21 +315,17 @@ function renderReferences() {
       const chip = document.createElement("span");
       chip.className = "ref-chip";
       chip.textContent = hw;
-      chip.addEventListener("click", () => {
-        const targetRow = [...document.querySelectorAll("tr")].find(
-          (tr) => tr.querySelector(".headword")?.textContent === hw
-        );
-        if (targetRow) {
-          targetRow.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-          targetRow.style.outline = "2px solid #3b82f6";
-          setTimeout(() => {
-            targetRow.style.outline = "";
-          }, 1500);
-        }
+
+      chip.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const headword = hw;
+        const contextLevel = getLevelForElement(chip);
+        const layerIndex = contextLevel;
+        if (layerIndex >= tooltipLayers.length) return;
+        hideTooltipFrom(layerIndex);
+        showTooltip(layerIndex, chip, headword);
       });
+
       cell.appendChild(chip);
     });
   });
@@ -398,9 +417,12 @@ function onDictWordClick(e) {
   const wordEl = e.target.closest(".dict-word");
   if (!wordEl) return;
   e.stopPropagation();
+
   const base = wordEl.querySelector(".base-word");
-  const headword = base ? base.textContent.trim() : "";
+  const headword =
+    wordEl.dataset.headword || (base ? base.textContent.trim() : "");
   if (!headword) return;
+
   const contextLevel = getLevelForElement(wordEl);
   const layerIndex = contextLevel;
   if (layerIndex >= tooltipLayers.length) return;
@@ -436,7 +458,10 @@ async function loadDictionary() {
 
   console.log("Build table...");
   buildTable();
+
+  console.log("Attach tooltip...");
   attachTooltipHandlers();
+  console.log("Ready");
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
