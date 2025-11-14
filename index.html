@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Learning Dictionary</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>Learning Dictionary</h1>
+      <p class="sub">
+        Headwords and definitions are written in the same language.<br />
+        Ruby text itself is editable. Click a word to see its definition in a
+        tooltip.
+      </p>
+
+      <table>
+        <colgroup>
+          <col style="width: 10%" />
+          <col style="width: 20%" />
+          <col style="width: 40%" />
+          <col style="width: 30%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Headword</th>
+            <th>Translation</th>
+            <th>Meaning</th>
+            <th>References</th>
+          </tr>
+        </thead>
+        <tbody id="dict-body"></tbody>
+      </table>
+
+      <p class="footnote">
+        Translations are stored in a cookie in this browser.
+      </p>
+
+      <div id="tooltip-layer-0" class="tooltip-box"></div>
+      <div id="tooltip-layer-1" class="tooltip-box"></div>
+      <div id="tooltip-layer-2" class="tooltip-box"></div>
+    </div>
+
+    <script src="main.js" defer></script>
+  </body>
+</html>
