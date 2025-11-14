@@ -126,10 +126,10 @@ function computeReferences() {
 
     for (const raw of tokens) {
       if (!raw) continue;
-      if (SPECIAL_HEADWORDS.includes(raw)) continue;
 
       const token = raw.replace(/^[^\w]+|[^\w]+$/g, "");
       if (!token) continue;
+      if (SPECIAL_HEADWORDS.includes(raw)) continue;
 
       const B = map[token];
       if (!B) continue;
@@ -423,16 +423,21 @@ function attachTooltipHandlers() {
 }
 
 async function loadDictionary() {
+  console.log("Loading CSV...");
   const res = await fetch("dictionary.csv");
   const csvText = await res.text();
+
+  console.log("CSV loaded, parsing...");
   ENTRIES = parseCsv(csvText);
 
+  console.log("Building headword map...");
   headwordToEntry = {};
   ENTRIES.forEach((e) => (headwordToEntry[e.headword] = e));
   HEADWORD_LIST = ENTRIES.map((e) => e.headword).sort(
     (a, b) => b.length - a.length
   );
 
+  console.log("Build table...");
   buildTable();
   attachTooltipHandlers();
 }
