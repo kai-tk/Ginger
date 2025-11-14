@@ -226,7 +226,7 @@ function buildTable() {
         if (!data[entry.id]) data[entry.id] = {};
         data[entry.id].translation = input.value;
         saveUserData(data);
-        updateMeaningsForHeadword(entry.headword);
+        updateAllMeaningsFromInputs();
       });
       tdTrans.appendChild(input);
     }
@@ -273,31 +273,6 @@ function updateAllMeaningsFromInputs() {
     cell.innerHTML = renderMeaningHtml(entry.meaning, translations);
   });
   attachTooltipHandlers();
-}
-
-function updateMeaningsForHeadword(headword) {
-  const translations = collectTranslationsFromInputs();
-  const entry = headwordToEntry[headword];
-  if (!entry) return;
-
-  const selfCell = document.querySelector(
-    `.meaning-cell[data-entry-id="${entry.id}"]`
-  );
-  if (selfCell) {
-    selfCell.innerHTML = renderMeaningHtml(entry.meaning, translations);
-  }
-
-  const refs = entry._refs || [];
-  refs.forEach((refHw) => {
-    const refEntry = headwordToEntry[refHw];
-    if (!refEntry) return;
-    const refCell = document.querySelector(
-      `.meaning-cell[data-entry-id="${refEntry.id}"]`
-    );
-    if (refCell) {
-      refCell.innerHTML = renderMeaningHtml(refEntry.meaning, translations);
-    }
-  });
 }
 
 function renderReferences() {
