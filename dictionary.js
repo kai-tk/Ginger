@@ -1,4 +1,4 @@
-﻿TITLE,ginger kevin du
+﻿window.DICTIONARY_CSV = `TITLE,ginger kevin du
 PUBLISH,lizu ktap dudi. saoled cxqku. zuogu
 TITLE2,ginger vh cxqku ee dudi kytu @ kevin du 2025
 FOREWORD,cxdg uku cxlh ji. tta ykai z yra buk ahk ppicj ee rek ee kytu vk dku ler xzt vs eguux vt lizu ktap btebr hkdg. vr axuaxf bteb vh l btebe o eut je l ji.
@@ -1203,4 +1203,4 @@ zuli,sj. yater z eguux jakch f yra lela. yre ysi yh yux alpp ji o yre ysi yux ya
 zulig,sj. vh yra sxresh cjja axt kadu f lela.
 zuogu,sj. yre taguqr. hatel kadu.
 zuy,sj. zine z tata z lela.
-zuya,a. plu tata. uku ging shlp.
+zuya,a. plu tata. uku ging shlp.`;

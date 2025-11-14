@@ -424,12 +424,8 @@ function attachTooltipHandlers() {
 }
 
 async function loadDictionary() {
-  console.log("Loading CSV...");
-  const res = await fetch("dictionary.csv");
-  const csvText = await res.text();
-
-  console.log("CSV loaded, parsing...");
-  ENTRIES = parseCsv(csvText);
+  console.log("Parsing embedded CSV...");
+  ENTRIES = parseCsv(window.DICTIONARY_CSV);
 
   console.log("Building headword map...");
   headwordToEntry = {};
