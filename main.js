@@ -101,11 +101,41 @@ function computeReferences() {
   ENTRIES.forEach((entry) => {
     entry._refs = [];
   });
+
+  SPECIAL_HEADWORDS = [
+    "a",
+    "bu",
+    "cj",
+    "e",
+    "hh",
+    "i",
+    "k",
+    "p",
+    "q",
+    "r",
+    "sj",
+    "y",
+  ];
+
+  const map = headwordToEntry;
+
   for (const A of ENTRIES) {
-    for (const B of ENTRIES) {
-      if (A === B) continue;
-      const re = new RegExp("\\b" + escapeRegExp(B.headword) + "\\b", "i");
-      if (re.test(A.meaning)) {
+    if (!A.meaning) continue;
+
+    const tokens = A.meaning.split(/\s+/);
+
+    for (const raw of tokens) {
+      if (!raw) continue;
+      if (SPECIAL_HEADWORDS.includes(raw)) continue;
+
+      const token = raw.replace(/^[^\w]+|[^\w]+$/g, "");
+      if (!token) continue;
+
+      const B = map[token];
+      if (!B) continue;
+      if (B === A) continue;
+
+      if (!B._refs.includes(A.headword)) {
         B._refs.push(A.headword);
       }
     }

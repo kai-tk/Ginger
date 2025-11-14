@@ -52,7 +52,7 @@ tbody tr:nth-child(even) {
   font-weight: 600;
 }
 input.translation-input {
-  width: 30%;
+  width: 80%;
   box-sizing: border-box;
   padding: 0.25rem 0.35rem;
   font-size: 0.9rem;
