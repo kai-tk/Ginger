@@ -50,10 +50,36 @@ function getCookie(name) {
 
 function loadUserData() {
   try {
+    // Prefer localStorage (larger storage, avoids cookie size limits)
+    if (typeof localStorage !== "undefined") {
+      try {
+        const rawLocal = localStorage.getItem(COOKIE_NAME);
+        if (rawLocal) {
+          const data = tryDecompressOrJson(rawLocal);
+          if (typeof data === "object" && data !== null) return data;
+        }
+      } catch (e) {
+        // localStorage may be unavailable, fall through to cookie
+      }
+    }
+
+    // Fallback to cookie for older data / compatibility. If cookie exists, migrate it to localStorage.
     const raw = getCookie(COOKIE_NAME);
     if (!raw) return {};
-    const data = JSON.parse(raw);
+    const data = tryDecompressOrJson(raw);
     if (typeof data !== "object" || data === null) return {};
+
+    // Attempt migration: save compressed representation into localStorage and delete cookie
+    try {
+      if (typeof localStorage !== "undefined") {
+        const compressed = compressUserData(data);
+        localStorage.setItem(COOKIE_NAME, compressed);
+        deleteCookie(COOKIE_NAME);
+      }
+    } catch (e) {
+      // ignore migration errors
+    }
+
     return data;
   } catch {
     return {};
@@ -61,7 +87,72 @@ function loadUserData() {
 }
 
 function saveUserData(userData) {
-  setCookie(COOKIE_NAME, JSON.stringify(userData), 365);
+  // Store in compressed form to avoid cookie size limits. Use localStorage only.
+  try {
+    const compressed = compressUserData(userData);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(COOKIE_NAME, compressed);
+    }
+  } catch (e) {
+    // If localStorage fails, try to at least set a cookie as a last resort
+    try {
+      setCookie(COOKIE_NAME, JSON.stringify(userData), 365);
+    } catch (_) {
+      // give up silently
+    }
+  }
+}
+
+function deleteCookie(name) {
+  try {
+    document.cookie =
+      name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
+  } catch (e) {
+    // ignore
+  }
+}
+
+// Compress userData (object mapping ids to {translation}) into compact string.
+// Format: "0:encoded|13:encoded|..." where numeric keys are entry indices (without leading 'e').
+function compressUserData(userData) {
+  const parts = [];
+  for (const id of Object.keys(userData)) {
+    const val = userData[id]?.translation;
+    if (!val) continue;
+    let key = id;
+    const m = /^e(\d+)$/.exec(id);
+    if (m) key = m[1];
+    parts.push(`${key}:${encodeURIComponent(val)}`);
+  }
+  return parts.join("|");
+}
+
+// Try to decompress compressed format or parse JSON. Returns object mapping ids to {translation}.
+function tryDecompressOrJson(raw) {
+  if (!raw) return {};
+  raw = String(raw);
+  // Heuristic: if it looks like JSON object
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+    try {
+      return JSON.parse(raw);
+    } catch {}
+  }
+
+  // Otherwise parse compressed pairs
+  const obj = {};
+  const parts = raw.split("|");
+  for (const p of parts) {
+    if (!p) continue;
+    const idx = p.indexOf(":");
+    if (idx === -1) continue;
+    const k = p.slice(0, idx);
+    const v = p.slice(idx + 1);
+    const decoded = decodeURIComponent(v);
+    const id = /^\d+$/.test(k) ? `e${k}` : k;
+    obj[id] = { translation: decoded };
+  }
+  return obj;
 }
 
 function escapeHtml(str) {
