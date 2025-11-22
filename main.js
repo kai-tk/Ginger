@@ -534,12 +534,16 @@ function showTooltip(level, anchorEl, headword) {
   const entry = headwordToEntry[headword];
   const meaning = entry?.meaning || "";
   const headEsc = escapeHtml(headword);
-  const meaningHtml = renderMeaningHtml(
-    meaning,
-    collectTranslationsFromInputs()
-  );
+  const translations = collectTranslationsFromInputs();
+  const meaningHtml = renderMeaningHtml(meaning, translations);
+  const translationText = translations[headword] || "";
+  const transEsc = escapeHtml(translationText);
+
   layer.innerHTML =
     `<div class="tooltip-headword">${headEsc}</div>` +
+    (translationText
+      ? `<div class="tooltip-translation">${transEsc}</div>`
+      : ``) +
     `<div class="tooltip-body">${meaningHtml}</div>`;
   layer.classList.add("visible");
   layer.style.left = "0px";

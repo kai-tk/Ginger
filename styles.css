@@ -127,6 +127,11 @@ ruby > rt.ruby-empty {
   margin-bottom: 0.25rem;
   font-size: 0.9rem;
 }
+.tooltip-translation {
+  font-size: 0.85rem;
+  color: #e5e7eb;
+  margin-bottom: 0.35rem;
+}
 .tooltip-body {
   margin-top: 0.1rem;
 }
