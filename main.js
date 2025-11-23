@@ -446,6 +446,7 @@ function renderReferences() {
 function applyFilter() {
   const selectedWords = meaningFilterSelected;
   const translationMode = translationFilterMode;
+  const topMeaningText = (document.getElementById("meaning-search")?.value || "").trim().toLowerCase();
 
   ENTRIES.forEach((entry) => {
     const row = document.querySelector(`tr[data-entry-id="${entry.id}"]`);
@@ -455,6 +456,12 @@ function applyFilter() {
     if (selectedWords.size > 0) {
       const tokenSet = entry._tokenSet || new Set();
       passMeaning = [...selectedWords].some((w) => tokenSet.has(w));
+    }
+
+    // top meaning text filter (partial match)
+    if (passMeaning && topMeaningText) {
+      const mv = (entry.meaning || "").toLowerCase();
+      if (!mv.includes(topMeaningText)) passMeaning = false;
     }
 
     let passTranslation = true;
@@ -648,6 +655,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupFilters();
   loadDictionary();
   setupSearch();
+  // wire meaning-search box (under headword search)
+  const meaningInput = document.getElementById("meaning-search");
+  const meaningBtn = document.getElementById("meaning-search-button");
+  const meaningClear = document.getElementById("meaning-clear-search");
+  if (meaningInput) {
+    function debounce(fn, wait) {
+      let t = null;
+      return function (...args) {
+        if (t) clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), wait);
+      };
+    }
+    meaningInput.addEventListener("input", debounce(() => {
+      applyFilter();
+    }, 200));
+
+    if (meaningBtn) {
+      meaningBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        applyFilter();
+      });
+    }
+    if (meaningClear) {
+      meaningClear.addEventListener("click", (e) => {
+        e.preventDefault();
+        meaningInput.value = "";
+        meaningInput.focus();
+        applyFilter();
+      });
+    }
+  }
 });
 
 function setupSearch() {

@@ -140,10 +140,11 @@ ruby > rt.ruby-empty {
   right: 12px;
   z-index: 12000;
   display: flex;
-  gap: 6px;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
   background: rgba(255,255,255,0.96);
-  padding: 6px 8px;
+  padding: 8px;
   border-radius: 8px;
   box-shadow: 0 8px 20px rgba(15,23,42,0.12);
 }
@@ -154,6 +155,8 @@ ruby > rt.ruby-empty {
   border: 1px solid #e5e7eb;
   font-size: 0.95rem;
 }
+
+.search-controls { display: flex; gap: 6px; align-items: center; }
 
 .not-found {
   animation: nf 720ms ease-in-out;
@@ -175,7 +178,7 @@ ruby > rt.ruby-empty {
   cursor: pointer;
   font-size: 0.85rem;
 }
-#search-box button[aria-label="Clear"] {
+#search-box button[aria-label^="Clear"] {
   background: transparent;
   color: #6b7280;
   padding: 4px 6px;
@@ -187,7 +190,7 @@ ruby > rt.ruby-empty {
     right: 8px;
     top: auto;
     bottom: 12px;
-    justify-content: space-between;
+    align-items: stretch;
   }
   #search-box input[type="search"] { width: 48%; }
 }

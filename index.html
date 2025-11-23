@@ -22,9 +22,17 @@
   </head>
   <body>
     <div id="search-box" aria-label="Global search">
-      <input id="global-search" type="search" placeholder="Search headword..." aria-label="Search headword" />
-      <button id="search-button" aria-label="Search">Search</button>
-      <button id="clear-search" aria-label="Clear">×</button>
+      <div class="search-controls">
+        <input id="global-search" type="search" placeholder="Search headword..." aria-label="Search headword" />
+        <button id="search-button" aria-label="Search">Search</button>
+        <button id="clear-search" aria-label="Clear">×</button>
+      </div>
+
+      <div class="search-controls">
+        <input id="meaning-search" type="search" placeholder="Search Meaning..." aria-label="Search Meaning" />
+        <button id="meaning-search-button" aria-label="Search Meaning">Search</button>
+        <button id="meaning-clear-search" aria-label="Clear Meaning">×</button>
+      </div>
     </div>
     <div class="wrapper">
       <h1>Learning Dictionary</h1>
