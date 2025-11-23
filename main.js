@@ -647,7 +647,99 @@ async function loadDictionary() {
 document.addEventListener("DOMContentLoaded", async () => {
   setupFilters();
   loadDictionary();
+  setupSearch();
 });
+
+function setupSearch() {
+  const input = document.getElementById("global-search");
+  const btn = document.getElementById("search-button");
+  const clear = document.getElementById("clear-search");
+  if (!input || !btn || !clear) return;
+
+  // simple debounce helper to avoid excessive jumps while typing
+  function debounce(fn, wait) {
+    let t = null;
+    return function (...args) {
+      if (t) clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), wait);
+    };
+  }
+
+  const doSearch = () => {
+    const q = input.value.trim();
+    if (!q) return;
+    jumpToHeadword(q);
+  };
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    doSearch();
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      doSearch();
+    }
+  });
+
+  // Auto-search as the user types (debounced)
+  input.addEventListener("input", debounce(() => {
+    const q = input.value.trim();
+    if (!q) return;
+    doSearch();
+  }, 220));
+
+  clear.addEventListener("click", (e) => {
+    e.preventDefault();
+    input.value = "";
+    input.focus();
+  });
+}
+
+function jumpToHeadword(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return;
+
+  // exact match first
+  const rows = Array.from(document.querySelectorAll("tr"));
+  let target = rows.find((tr) => {
+    const hw = tr.querySelector(".headword");
+    return hw && hw.textContent.trim().toLowerCase() === q;
+  });
+
+  // fallback: startsWith
+  if (!target) {
+    target = rows.find((tr) => {
+      const hw = tr.querySelector(".headword");
+      return hw && hw.textContent.trim().toLowerCase().startsWith(q);
+    });
+  }
+
+  // fallback: includes
+  if (!target) {
+    target = rows.find((tr) => {
+      const hw = tr.querySelector(".headword");
+      return hw && hw.textContent.trim().toLowerCase().includes(q);
+    });
+  }
+
+  if (!target) {
+    // optionally, flash input to indicate not found
+    const input = document.getElementById("global-search");
+    if (input) {
+      input.classList.add("not-found");
+      setTimeout(() => input.classList.remove("not-found"), 800);
+    }
+    return;
+  }
+
+  target.scrollIntoView({ behavior: "smooth", block: "center" });
+  target.style.outline = "3px solid #f59e0b";
+  setTimeout(() => {
+    target.style.outline = "";
+  }, 1600);
+}
 
 function downloadUserData() {
   const data = loadUserData();

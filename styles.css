@@ -132,6 +132,65 @@ ruby > rt.ruby-empty {
   color: #e5e7eb;
   margin-bottom: 0.35rem;
 }
+
+/* Global sticky search box */
+#search-box {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 12000;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background: rgba(255,255,255,0.96);
+  padding: 6px 8px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(15,23,42,0.12);
+}
+#search-box input[type="search"] {
+  width: 220px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.95rem;
+}
+
+.not-found {
+  animation: nf 720ms ease-in-out;
+  border-color: #ef4444 !important;
+  box-shadow: 0 6px 18px rgba(239,68,68,0.12) !important;
+}
+@keyframes nf {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-2px); }
+  50% { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+#search-box button {
+  background: #111827;
+  color: #fff;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+#search-box button[aria-label="Clear"] {
+  background: transparent;
+  color: #6b7280;
+  padding: 4px 6px;
+}
+
+@media (max-width: 640px) {
+  #search-box {
+    left: 8px;
+    right: 8px;
+    top: auto;
+    bottom: 12px;
+    justify-content: space-between;
+  }
+  #search-box input[type="search"] { width: 48%; }
+}
 .tooltip-body {
   margin-top: 0.1rem;
 }
