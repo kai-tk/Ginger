@@ -10,7 +10,6 @@ END,xhjr pu.
 ACHIEVE1,amter (ju oraux aoliga.)
 ACHIEVE2,jidak (uku gega qhh.)
 ITCH,yra pdepr. kelio ginga ju je f yra gega. ―― olla. bteb z ja oam xlio.
-ZUCJCHTXT, olla. zucjch yra ji. vh wax z ktap o wux z gudih. jar z je ja ji el je shley. je tacx tae. je je asj. kevin
 a,
 bu,
 cj,
@@ -1204,4 +1203,5 @@ zuli,sj. yater z eguux jakch f yra lela. yre ysi yh yux alpp ji o yre ysi yux ya
 zulig,sj. vh yra sxresh cjja axt kadu f lela.
 zuogu,sj. yre taguqr. hatel kadu.
 zuy,sj. zine z tata z lela.
-zuya,a. plu tata. uku ging shlp.`;
+zuya,a. plu tata. uku ging shlp.
+ZUCJCHTXT, olla. zucjch yra ji. vh wax z ktap o wux z gudih. jar z je ja ji el je shley. je tacx tae. je je asj. kevin`;
