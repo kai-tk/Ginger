@@ -23,14 +23,26 @@
   <body>
     <div id="search-box" aria-label="Global search">
       <div class="search-controls">
-        <input id="global-search" type="search" placeholder="Search headword..." aria-label="Search headword" />
+        <input
+          id="global-search"
+          type="search"
+          placeholder="Search headword..."
+          aria-label="Search headword"
+        />
         <button id="search-button" aria-label="Search">Search</button>
         <button id="clear-search" aria-label="Clear">×</button>
       </div>
 
       <div class="search-controls">
-        <input id="meaning-search" type="search" placeholder="Search Meaning..." aria-label="Search Meaning" />
-        <button id="meaning-search-button" aria-label="Search Meaning">Search</button>
+        <input
+          id="meaning-search"
+          type="search"
+          placeholder="Search Meaning..."
+          aria-label="Search Meaning"
+        />
+        <button id="meaning-search-button" aria-label="Search Meaning">
+          Search
+        </button>
         <button id="meaning-clear-search" aria-label="Clear Meaning">×</button>
       </div>
     </div>
@@ -44,18 +56,60 @@
 
       <div class="filter-bar">
         <div class="filter-group">
-          <span class="filter-label">Translation:</span>
+          <span class="filter-label">Translation Status:</span>
           <label class="filter-chip">
-            <input type="radio" name="filter-translation" value="all" checked />
+            <input
+              type="radio"
+              name="filter-translation-status"
+              value="all"
+              checked
+            />
             All
           </label>
           <label class="filter-chip">
-            <input type="radio" name="filter-translation" value="filled" />
+            <input
+              type="radio"
+              name="filter-translation-status"
+              value="filled"
+            />
             Filled
           </label>
           <label class="filter-chip">
-            <input type="radio" name="filter-translation" value="empty" />
+            <input
+              type="radio"
+              name="filter-translation-status"
+              value="empty"
+            />
             Empty
+          </label>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Meaning Coverage:</span>
+          <label class="filter-chip">
+            <input
+              type="radio"
+              name="filter-meaning-coverage"
+              value="all"
+              checked
+            />
+            All
+          </label>
+          <label class="filter-chip">
+            <input
+              type="radio"
+              name="filter-meaning-coverage"
+              value="50percent"
+            />
+            50%
+          </label>
+          <label class="filter-chip">
+            <input
+              type="radio"
+              name="filter-meaning-coverage"
+              value="100percent"
+            />
+            100%
           </label>
         </div>
 

@@ -21,7 +21,8 @@ const MEANING_FILTER_WORDS = [
 ];
 
 let meaningFilterSelected = new Set();
-let translationFilterMode = "all";
+let translationStatusFilter = "all"; // "all", "filled", "empty"
+let meaningCoverageFilter = "all"; // "all", "80percent", "100percent"
 
 function isUpperLike(word) {
   return /^[A-Z0-9]+$/.test(word);
@@ -445,7 +446,8 @@ function renderReferences() {
 
 function applyFilter() {
   const selectedWords = meaningFilterSelected;
-  const translationMode = translationFilterMode;
+  const statusFilter = translationStatusFilter;
+  const coverageFilter = meaningCoverageFilter;
   const topMeaningText = (document.getElementById("meaning-search")?.value || "").trim().toLowerCase();
 
   ENTRIES.forEach((entry) => {
@@ -464,18 +466,68 @@ function applyFilter() {
       if (!mv.includes(topMeaningText)) passMeaning = false;
     }
 
-    let passTranslation = true;
-    if (translationMode !== "all") {
+    // Translation Status Filter
+    let passStatus = true;
+    if (statusFilter !== "all") {
       const input = row.querySelector(".translation-input");
       const hasText = !!(input && input.value.trim());
-      if (translationMode === "filled") {
-        passTranslation = hasText;
-      } else if (translationMode === "empty") {
-        passTranslation = !hasText;
+      
+      if (statusFilter === "filled") {
+        passStatus = hasText;
+      } else if (statusFilter === "empty") {
+        passStatus = !hasText;
       }
     }
 
-    row.style.display = passMeaning && passTranslation ? "" : "none";
+    // Meaning Coverage Filter
+    let passCoverage = true;
+    if (coverageFilter !== "all") {
+      const input = row.querySelector(".translation-input");
+      const hasText = !!(input && input.value.trim());
+      
+      if (coverageFilter === "50percent" || coverageFilter === "100percent") {
+        const meaningValue = entry.meaning || "";
+        let percentage = 0;
+        
+        if (meaningValue.length === 0) {
+          // If meaning is empty, coverage is 0%
+          percentage = 0;
+        } else if (hasText) {
+          const translations = collectTranslationsFromInputs();
+          
+          // Count total words in meaning
+          const tokens = meaningValue.split(/(\s+)/);
+          const words = tokens.filter(t => t.trim() && !/^\s+$/.test(t));
+          
+          if (words.length === 0) {
+            percentage = 100;
+          } else {
+            // Count words with Ruby (i.e., words that have translations)
+            let rubyCount = 0;
+            for (const word of words) {
+              const core = word.replace(/^[^\w]+|[^\w]+$/g, "");
+              const entry2 = headwordToEntry[core];
+              if (entry2 && translations[entry2.headword]) {
+                rubyCount++;
+              }
+            }
+            
+            percentage = (rubyCount / words.length) * 100;
+          }
+        } else {
+          // No translation, so 0%
+          percentage = 0;
+        }
+        
+        if (coverageFilter === "50percent") {
+          passCoverage = percentage >= 50;
+        } else if (coverageFilter === "100percent") {
+          passCoverage = percentage >= 100;
+        }
+      }
+    }
+
+    row.style.display = passMeaning && passStatus && passCoverage ? "" : "none";
   });
 }
 
@@ -486,10 +538,15 @@ function handleFilterChange() {
     )
   );
 
-  const radio = document.querySelector(
-    'input[name="filter-translation"]:checked'
+  const statusRadio = document.querySelector(
+    'input[name="filter-translation-status"]:checked'
   );
-  translationFilterMode = radio ? radio.value : "all";
+  translationStatusFilter = statusRadio ? statusRadio.value : "all";
+
+  const coverageRadio = document.querySelector(
+    'input[name="filter-meaning-coverage"]:checked'
+  );
+  meaningCoverageFilter = coverageRadio ? coverageRadio.value : "all";
 
   applyFilter();
 }
@@ -514,7 +571,13 @@ function setupFilters() {
   });
 
   document
-    .querySelectorAll('input[name="filter-translation"]')
+    .querySelectorAll('input[name="filter-translation-status"]')
+    .forEach((radio) => {
+      radio.addEventListener("change", handleFilterChange);
+    });
+
+  document
+    .querySelectorAll('input[name="filter-meaning-coverage"]')
     .forEach((radio) => {
       radio.addEventListener("change", handleFilterChange);
     });

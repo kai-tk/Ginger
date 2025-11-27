@@ -1204,4 +1204,4 @@ zulig,sj. vh yra sxresh cjja axt kadu f lela.
 zuogu,sj. yre taguqr. hatel kadu.
 zuy,sj. zine z tata z lela.
 zuya,a. plu tata. uku ging shlp.
-ZUCJCHTXT, olla. zucjch yra ji. vh wax z ktap o wux z gudih. jar z je ja ji el je shley. je tacx tae. je je asj. kevin`;
+ZUCJCHTXT, olla. zucjch yra ji. vh wax z ktap o wux z gudih. jar z je ja ji el je shley. je tacx tae. ja je asj. kevin`;
