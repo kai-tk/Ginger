@@ -1,5 +1,4 @@
 (() => {
-  const originalRenderWordList = renderWordList;
   const originalBindCustomPageEvents = bindCustomPageEvents;
 
   function getSortedWordEntries(page) {
@@ -17,27 +16,37 @@
 
   renderWordList = function (page) {
     const entries = getSortedWordEntries(page);
-    if (!entries.length) {
-      return `<div class="workspace-empty">文章を追加すると、ここに単語が自動で並ぶよ。</div>`;
-    }
 
-    const rows = entries.map(([word, meaning]) => `
-      <div
-        class="workspace-word-row"
-        data-word="${escapeWorkspaceHtml(word)}"
-        data-meaning-filled="${meaning.trim() ? "true" : "false"}"
-      >
-        <div class="workspace-word">${escapeWorkspaceHtml(word)}</div>
-        <input
-          class="workspace-meaning-input"
-          type="text"
-          value="${escapeWorkspaceHtml(meaning)}"
-          placeholder="意味"
-          aria-label="${escapeWorkspaceHtml(word)} meaning"
-        />
-      </div>`).join("");
+    const rows = entries.length
+      ? entries.map(([word, meaning]) => `
+          <div
+            class="workspace-word-row"
+            data-word="${escapeWorkspaceHtml(word)}"
+            data-meaning-filled="${meaning.trim() ? "true" : "false"}"
+          >
+            <div class="workspace-word">${escapeWorkspaceHtml(word)}</div>
+            <input
+              class="workspace-meaning-input"
+              type="text"
+              value="${escapeWorkspaceHtml(meaning)}"
+              placeholder="意味"
+              aria-label="${escapeWorkspaceHtml(word)} meaning"
+            />
+          </div>`).join("")
+      : `<div class="workspace-empty">文章または単語を追加すると、ここに並ぶよ。</div>`;
 
     return `
+      <form id="standalone-word-form" class="standalone-word-form">
+        <input
+          id="standalone-word-input"
+          type="text"
+          autocomplete="off"
+          placeholder="単語を追加..."
+          aria-label="Add word"
+        />
+        <button type="submit">+</button>
+      </form>
+
       <div class="workspace-word-tools">
         <input
           id="word-filter-input"
@@ -96,6 +105,22 @@
     const host = document.getElementById("custom-page-host");
     if (!host) return;
 
+    const standaloneForm = host.querySelector("#standalone-word-form");
+    const standaloneInput = host.querySelector("#standalone-word-input");
+    standaloneForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = standaloneInput?.value || "";
+      if (!value.trim()) return;
+      if (/\s/.test(value.trim())) {
+        standaloneInput.setCustomValidity("単語は空白を含めず1語ずつ追加してね。");
+        standaloneInput.reportValidity();
+        return;
+      }
+      standaloneInput.setCustomValidity("");
+      if (addStandaloneWord(page.id, value)) standaloneInput.value = "";
+    });
+    standaloneInput?.addEventListener("input", () => standaloneInput.setCustomValidity(""));
+
     const filterInput = host.querySelector("#word-filter-input");
     const statusFilter = host.querySelector("#word-status-filter");
     const sortSelect = host.querySelector("#word-sort-select");
@@ -109,7 +134,6 @@
       renderActivePage();
     });
 
-    // Keep filtering state correct when a meaning is edited.
     host.querySelectorAll(".workspace-meaning-input").forEach((meaningInput) => {
       const row = meaningInput.closest(".workspace-word-row");
       meaningInput.addEventListener("input", () => {
