@@ -17,8 +17,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Learning Dictionary</title>
-    <link rel="stylesheet" href="styles.css?v=20260825-1931" />
-    <link rel="stylesheet" href="compact-layout.css?v=20260825-1931" />
+    <link rel="stylesheet" href="styles.css?v=20260825-1935" />
+    <link rel="stylesheet" href="compact-layout.css?v=20260825-1935" />
   </head>
   <body>
     <nav id="page-nav" class="page-nav" aria-label="Pages">
@@ -32,23 +32,12 @@
 
     <div id="search-box" aria-label="Global search">
       <div class="search-controls">
-        <input
-          id="global-search"
-          type="search"
-          placeholder="Search headword..."
-          aria-label="Search headword"
-        />
+        <input id="global-search" type="search" placeholder="Search headword..." aria-label="Search headword" />
         <button id="search-button" aria-label="Search">Search</button>
         <button id="clear-search" aria-label="Clear">×</button>
       </div>
-
       <div class="search-controls">
-        <input
-          id="meaning-search"
-          type="search"
-          placeholder="Search Meaning..."
-          aria-label="Search Meaning"
-        />
+        <input id="meaning-search" type="search" placeholder="Search Meaning..." aria-label="Search Meaning" />
         <button id="meaning-search-button" aria-label="Search Meaning">Search</button>
         <button id="meaning-clear-search" aria-label="Clear Meaning">×</button>
       </div>
@@ -65,36 +54,16 @@
       <div class="filter-bar">
         <div class="filter-group">
           <span class="filter-label">Translation Status:</span>
-          <label class="filter-chip">
-            <input type="radio" name="filter-translation-status" value="all" checked />
-            All
-          </label>
-          <label class="filter-chip">
-            <input type="radio" name="filter-translation-status" value="filled" />
-            Filled
-          </label>
-          <label class="filter-chip">
-            <input type="radio" name="filter-translation-status" value="empty" />
-            Empty
-          </label>
+          <label class="filter-chip"><input type="radio" name="filter-translation-status" value="all" checked /> All</label>
+          <label class="filter-chip"><input type="radio" name="filter-translation-status" value="filled" /> Filled</label>
+          <label class="filter-chip"><input type="radio" name="filter-translation-status" value="empty" /> Empty</label>
         </div>
-
         <div class="filter-group">
           <span class="filter-label">Meaning Coverage:</span>
-          <label class="filter-chip">
-            <input type="radio" name="filter-meaning-coverage" value="all" checked />
-            All
-          </label>
-          <label class="filter-chip">
-            <input type="radio" name="filter-meaning-coverage" value="50percent" />
-            50%
-          </label>
-          <label class="filter-chip">
-            <input type="radio" name="filter-meaning-coverage" value="100percent" />
-            100%
-          </label>
+          <label class="filter-chip"><input type="radio" name="filter-meaning-coverage" value="all" checked /> All</label>
+          <label class="filter-chip"><input type="radio" name="filter-meaning-coverage" value="50percent" /> 50%</label>
+          <label class="filter-chip"><input type="radio" name="filter-meaning-coverage" value="100percent" /> 100%</label>
         </div>
-
         <div class="filter-group">
           <span class="filter-label">Meaning filter:</span>
           <div id="filter-meaning-words" class="filter-meaning-list"></div>
@@ -102,25 +71,12 @@
       </div>
 
       <table>
-        <colgroup>
-          <col style="width: 10%" />
-          <col style="width: 10%" />
-          <col style="width: 40%" />
-          <col style="width: 40%" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th>Headword</th>
-            <th>Translation</th>
-            <th>Meaning</th>
-            <th>References</th>
-          </tr>
-        </thead>
+        <colgroup><col style="width: 10%" /><col style="width: 10%" /><col style="width: 40%" /><col style="width: 40%" /></colgroup>
+        <thead><tr><th>Headword</th><th>Translation</th><th>Meaning</th><th>References</th></tr></thead>
         <tbody id="dict-body"></tbody>
       </table>
 
       <p class="footnote">Translations are stored in this browser.</p>
-
       <div id="tooltip-layer-0" class="tooltip-box"></div>
       <div id="tooltip-layer-1" class="tooltip-box"></div>
       <div id="tooltip-layer-2" class="tooltip-box"></div>
@@ -128,19 +84,15 @@
 
     <main id="custom-page-host" class="custom-page-host" hidden></main>
 
-    <script src="dictionary.js?v=20260825-1931" defer></script>
-    <script src="main.js?v=20260825-1931" defer></script>
-    <script src="workspace.js?v=20260825-1931" defer></script>
-    <script src="word-tools.js?v=20260825-1931" defer></script>
+    <script src="dictionary.js?v=20260825-1935" defer></script>
+    <script src="main.js?v=20260825-1935" defer></script>
+    <script src="workspace.js?v=20260825-1935" defer></script>
+    <script src="punctuation-tools.js?v=20260825-1935" defer></script>
+    <script src="word-tools.js?v=20260825-1935" defer></script>
   </body>
 
   <footer id="dictionary-footer">
-    <input
-      type="file"
-      id="import-file"
-      accept="application/json"
-      style="display: none"
-    />
+    <input type="file" id="import-file" accept="application/json" style="display: none" />
     <button id="import-button">Import translations</button>
   </footer>
 </html>
