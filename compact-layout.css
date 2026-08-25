@@ -154,9 +154,9 @@
 }
 
 .workspace-ruby > rt {
-  min-height: 0.65em;
-  font-size: 0.6em;
-  line-height: 1;
+  min-height: 0.78em;
+  font-size: 0.75em;
+  line-height: 1.05;
   padding-top: 0;
 }
 
