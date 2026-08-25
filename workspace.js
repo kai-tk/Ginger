@@ -10,7 +10,6 @@ function makeId(prefix) {
 function normalizePage(page) {
   if (!page || typeof page !== "object") return null;
 
-  // Migrate pages created by the first workspace version without losing useful data.
   if (!Array.isArray(page.sentences)) {
     page.sentences = [];
     if (Array.isArray(page.items)) {
@@ -33,7 +32,6 @@ function normalizePage(page) {
     }
   }
 
-  // Rebuild the word list from all stored sentences while preserving meanings.
   page.sentences.forEach((sentence) => {
     splitSentence(sentence.text).forEach((word) => {
       if (!(word in page.words)) page.words[word] = "";
@@ -127,7 +125,6 @@ function syncWordsFromSentences(page) {
     splitSentence(sentence.text).forEach((word) => usedWords.add(word));
   });
 
-  // Keep only words that still occur in at least one sentence.
   const nextWords = {};
   usedWords.forEach((word) => {
     nextWords[word] = page.words[word] || "";
@@ -329,7 +326,12 @@ function renderCustomPage(page) {
         </div>
       </header>
 
-      <div class="workspace-split">
+      <form id="sentence-add-form" class="sentence-add-form sentence-add-form-top">
+        <textarea id="sentence-input" rows="2" placeholder="文章を入力。空白文字ごとに単語へ分解されるよ。"></textarea>
+        <button type="submit">+ Add sentence</button>
+      </form>
+
+      <div class="workspace-split workspace-split-main">
         <aside class="workspace-words-panel">
           <div class="workspace-panel-head">
             <h2>Words</h2>
@@ -339,10 +341,10 @@ function renderCustomPage(page) {
         </aside>
 
         <section class="workspace-sentences-panel">
-          <form id="sentence-add-form" class="sentence-add-form">
-            <textarea id="sentence-input" rows="3" placeholder="文章を入力。空白文字ごとに単語へ分解されるよ。"></textarea>
-            <button type="submit">+ Add sentence</button>
-          </form>
+          <div class="workspace-panel-head workspace-sentences-head">
+            <h2>Sentences</h2>
+            <span>${page.sentences.length}</span>
+          </div>
           <div class="workspace-sentence-list">${renderSentenceList(page)}</div>
         </section>
       </div>
