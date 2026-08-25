@@ -136,7 +136,7 @@ ruby > rt.ruby-empty {
 /* Global sticky search box */
 #search-box {
   position: fixed;
-  top: 12px;
+  top: 64px;
   right: 12px;
   z-index: 12000;
   display: flex;
@@ -288,4 +288,268 @@ ruby > rt.ruby-empty {
   white-space: nowrap;
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.page-nav {
+  position: sticky;
+  top: 0;
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 1rem;
+  background: rgba(243, 244, 246, 0.96);
+  border-bottom: 1px solid #d1d5db;
+  backdrop-filter: blur(8px);
+}
+
+.page-tabs {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.page-tab,
+.page-add-button,
+.item-add-bar button,
+.page-management-actions button,
+.study-actions button {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.page-tab {
+  white-space: nowrap;
+}
+
+.page-tab.active {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+.page-add-button {
+  flex: none;
+  font-weight: 600;
+}
+
+.custom-page-host {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.custom-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.page-management-actions,
+.item-add-bar,
+.study-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.item-add-bar {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  background: #e5e7eb;
+}
+
+.item-add-bar button {
+  font-weight: 600;
+}
+
+.study-card-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.study-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.9rem;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.study-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.study-type-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.study-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.study-grid label,
+.note-field {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.study-wide {
+  grid-column: 1 / -1;
+}
+
+.workspace-field {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+textarea.workspace-field {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.workspace-field:focus {
+  outline: 2px solid #9ca3af;
+  outline-offset: 1px;
+  border-color: #6b7280;
+}
+
+.study-actions button {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.8rem;
+}
+
+.study-actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.danger-button {
+  color: #b91c1c !important;
+}
+
+.empty-page-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #6b7280;
+  background: #ffffff;
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+}
+
+@media (max-width: 720px) {
+  .page-nav {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-add-button {
+    width: 100%;
+  }
+
+  .custom-page-header {
+    flex-direction: column;
+  }
+
+  .study-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .study-wide {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #111827;
+    color: #f9fafb;
+  }
+
+  table,
+  .study-card,
+  .empty-page-state,
+  .page-tab,
+  .page-add-button,
+  .item-add-bar button,
+  .page-management-actions button,
+  .study-actions button,
+  .workspace-field {
+    background: #1f2937;
+    color: #f9fafb;
+    border-color: #374151;
+  }
+
+  thead,
+  .filter-bar,
+  .item-add-bar,
+  .study-type-badge {
+    background: #374151;
+    color: #f9fafb;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #18212f;
+  }
+
+  .page-nav {
+    background: rgba(17, 24, 39, 0.96);
+    border-color: #374151;
+  }
+
+  .page-tab.active {
+    background: #f9fafb;
+    color: #111827;
+    border-color: #f9fafb;
+  }
+
+  .filter-chip {
+    background: #1f2937;
+    color: #f9fafb;
+    border-color: #4b5563;
+  }
 }
