@@ -10,7 +10,6 @@
       dataLayer.push(arguments);
     }
     gtag("js", new Date());
-
     gtag("config", "G-70VJKDKB1B");
   </script>
 
@@ -21,6 +20,15 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <nav id="page-nav" class="page-nav" aria-label="Pages">
+      <div id="page-tabs" class="page-tabs">
+        <button class="page-tab active" type="button" data-page-id="dictionary">
+          Dictionary
+        </button>
+      </div>
+      <button id="add-page-button" class="page-add-button" type="button">+ New page</button>
+    </nav>
+
     <div id="search-box" aria-label="Global search">
       <div class="search-controls">
         <input
@@ -40,13 +48,12 @@
           placeholder="Search Meaning..."
           aria-label="Search Meaning"
         />
-        <button id="meaning-search-button" aria-label="Search Meaning">
-          Search
-        </button>
+        <button id="meaning-search-button" aria-label="Search Meaning">Search</button>
         <button id="meaning-clear-search" aria-label="Clear Meaning">×</button>
       </div>
     </div>
-    <div class="wrapper">
+
+    <div id="dictionary-page" class="wrapper">
       <h1>Learning Dictionary</h1>
       <p class="sub">
         Enter the translation, ruby text will be added automatically.<br />
@@ -58,28 +65,15 @@
         <div class="filter-group">
           <span class="filter-label">Translation Status:</span>
           <label class="filter-chip">
-            <input
-              type="radio"
-              name="filter-translation-status"
-              value="all"
-              checked
-            />
+            <input type="radio" name="filter-translation-status" value="all" checked />
             All
           </label>
           <label class="filter-chip">
-            <input
-              type="radio"
-              name="filter-translation-status"
-              value="filled"
-            />
+            <input type="radio" name="filter-translation-status" value="filled" />
             Filled
           </label>
           <label class="filter-chip">
-            <input
-              type="radio"
-              name="filter-translation-status"
-              value="empty"
-            />
+            <input type="radio" name="filter-translation-status" value="empty" />
             Empty
           </label>
         </div>
@@ -87,28 +81,15 @@
         <div class="filter-group">
           <span class="filter-label">Meaning Coverage:</span>
           <label class="filter-chip">
-            <input
-              type="radio"
-              name="filter-meaning-coverage"
-              value="all"
-              checked
-            />
+            <input type="radio" name="filter-meaning-coverage" value="all" checked />
             All
           </label>
           <label class="filter-chip">
-            <input
-              type="radio"
-              name="filter-meaning-coverage"
-              value="50percent"
-            />
+            <input type="radio" name="filter-meaning-coverage" value="50percent" />
             50%
           </label>
           <label class="filter-chip">
-            <input
-              type="radio"
-              name="filter-meaning-coverage"
-              value="100percent"
-            />
+            <input type="radio" name="filter-meaning-coverage" value="100percent" />
             100%
           </label>
         </div>
@@ -137,20 +118,21 @@
         <tbody id="dict-body"></tbody>
       </table>
 
-      <p class="footnote">
-        Translations are stored in a cookie in this browser.
-      </p>
+      <p class="footnote">Translations are stored in this browser.</p>
 
       <div id="tooltip-layer-0" class="tooltip-box"></div>
       <div id="tooltip-layer-1" class="tooltip-box"></div>
       <div id="tooltip-layer-2" class="tooltip-box"></div>
     </div>
 
+    <main id="custom-page-host" class="custom-page-host" hidden></main>
+
     <script src="dictionary.js" defer></script>
     <script src="main.js" defer></script>
+    <script src="workspace.js" defer></script>
   </body>
 
-  <footer>
+  <footer id="dictionary-footer">
     <input
       type="file"
       id="import-file"
