@@ -7,12 +7,50 @@ function makeId(prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function normalizePage(page) {
+  if (!page || typeof page !== "object") return null;
+
+  // Migrate pages created by the first workspace version without losing useful data.
+  if (!Array.isArray(page.sentences)) {
+    page.sentences = [];
+    if (Array.isArray(page.items)) {
+      page.items.forEach((item) => {
+        if (item?.type === "example" && item.source?.trim()) {
+          page.sentences.push({ id: item.id || makeId("sentence"), text: item.source });
+        }
+      });
+    }
+  }
+
+  if (!page.words || typeof page.words !== "object" || Array.isArray(page.words)) {
+    page.words = {};
+    if (Array.isArray(page.items)) {
+      page.items.forEach((item) => {
+        if (item?.type === "word" && item.word?.trim()) {
+          page.words[item.word.trim()] = item.translation || "";
+        }
+      });
+    }
+  }
+
+  // Rebuild the word list from all stored sentences while preserving meanings.
+  page.sentences.forEach((sentence) => {
+    splitSentence(sentence.text).forEach((word) => {
+      if (!(word in page.words)) page.words[word] = "";
+    });
+  });
+
+  delete page.items;
+  return page;
+}
+
 function loadWorkspaceState() {
   try {
     const raw = localStorage.getItem(WORKSPACE_STORAGE_KEY);
     if (!raw) return { pages: [] };
     const parsed = JSON.parse(raw);
     if (!parsed || !Array.isArray(parsed.pages)) return { pages: [] };
+    parsed.pages = parsed.pages.map(normalizePage).filter(Boolean);
     return parsed;
   } catch {
     return { pages: [] };
@@ -36,6 +74,10 @@ function escapeWorkspaceHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+function splitSentence(text) {
+  return String(text || "").trim().split(/\s+/).filter(Boolean);
+}
+
 function getPage(pageId) {
   return workspaceState.pages.find((page) => page.id === pageId) || null;
 }
@@ -45,7 +87,8 @@ function addPage() {
   const page = {
     id: makeId("page"),
     title: `Page ${number}`,
-    items: [],
+    sentences: [],
+    words: {},
   };
   workspaceState.pages.push(page);
   saveWorkspaceState();
@@ -78,66 +121,59 @@ function deletePage(pageId) {
   renderActivePage();
 }
 
-function addItem(pageId, type) {
+function syncWordsFromSentences(page) {
+  const usedWords = new Set();
+  page.sentences.forEach((sentence) => {
+    splitSentence(sentence.text).forEach((word) => usedWords.add(word));
+  });
+
+  // Keep only words that still occur in at least one sentence.
+  const nextWords = {};
+  usedWords.forEach((word) => {
+    nextWords[word] = page.words[word] || "";
+  });
+  page.words = nextWords;
+}
+
+function addSentence(pageId, text) {
   const page = getPage(pageId);
-  if (!page) return;
+  const trimmed = String(text || "").trim();
+  if (!page || !trimmed) return false;
 
-  let item;
-  if (type === "word") {
-    item = {
-      id: makeId("item"),
-      type: "word",
-      word: "",
-      translation: "",
-      meaning: "",
-    };
-  } else if (type === "example") {
-    item = {
-      id: makeId("item"),
-      type: "example",
-      source: "",
-      translation: "",
-      note: "",
-    };
-  } else {
-    item = {
-      id: makeId("item"),
-      type: "note",
-      text: "",
-    };
-  }
+  page.sentences.push({ id: makeId("sentence"), text: trimmed });
+  splitSentence(trimmed).forEach((word) => {
+    if (!(word in page.words)) page.words[word] = "";
+  });
+  saveWorkspaceState();
+  renderActivePage();
+  return true;
+}
 
-  page.items.push(item);
+function updateSentence(pageId, sentenceId, text) {
+  const page = getPage(pageId);
+  const sentence = page?.sentences.find((item) => item.id === sentenceId);
+  if (!page || !sentence) return;
+  sentence.text = text;
+  syncWordsFromSentences(page);
   saveWorkspaceState();
   renderActivePage();
 }
 
-function updateItem(pageId, itemId, field, value) {
-  const page = getPage(pageId);
-  const item = page?.items.find((entry) => entry.id === itemId);
-  if (!item || !(field in item)) return;
-  item[field] = value;
-  saveWorkspaceState();
-}
-
-function deleteItem(pageId, itemId) {
+function deleteSentence(pageId, sentenceId) {
   const page = getPage(pageId);
   if (!page) return;
-  page.items = page.items.filter((item) => item.id !== itemId);
+  page.sentences = page.sentences.filter((item) => item.id !== sentenceId);
+  syncWordsFromSentences(page);
   saveWorkspaceState();
   renderActivePage();
 }
 
-function moveItem(pageId, itemId, direction) {
+function updateWordMeaning(pageId, word, meaning) {
   const page = getPage(pageId);
-  if (!page) return;
-  const index = page.items.findIndex((item) => item.id === itemId);
-  if (index < 0) return;
-  const nextIndex = index + direction;
-  if (nextIndex < 0 || nextIndex >= page.items.length) return;
-  [page.items[index], page.items[nextIndex]] = [page.items[nextIndex], page.items[index]];
+  if (!page || !(word in page.words)) return;
+  page.words[word] = meaning;
   saveWorkspaceState();
-  renderActivePage();
+  updateSentenceRubies(page);
 }
 
 function renderPageTabs() {
@@ -174,104 +210,104 @@ function renderPageTabs() {
   });
 }
 
-function renderWordItem(page, item, index) {
-  return `
-    <article class="study-card" data-item-id="${escapeWorkspaceHtml(item.id)}">
-      <div class="study-card-head">
-        <span class="study-type-badge">Word</span>
-        ${renderItemActions(page, item, index)}
-      </div>
-      <div class="study-grid word-grid">
-        <label>
-          <span>Word</span>
-          <input class="workspace-field" data-field="word" value="${escapeWorkspaceHtml(item.word)}" placeholder="ginger word" />
-        </label>
-        <label>
-          <span>Translation</span>
-          <input class="workspace-field" data-field="translation" value="${escapeWorkspaceHtml(item.translation)}" placeholder="meaning / translation" />
-        </label>
-        <label class="study-wide">
-          <span>Meaning / notes</span>
-          <textarea class="workspace-field" data-field="meaning" rows="3" placeholder="definition, grammar notes, related words...">${escapeWorkspaceHtml(item.meaning)}</textarea>
-        </label>
-      </div>
-    </article>`;
+function renderSentenceHtml(page, text) {
+  const tokens = String(text || "").split(/(\s+)/);
+  return tokens.map((token) => {
+    if (/^\s+$/.test(token)) return escapeWorkspaceHtml(token);
+    if (!token) return "";
+    const meaning = page.words[token] || "";
+    const emptyClass = meaning ? "" : " ruby-empty";
+    return `<ruby class="workspace-ruby" data-word="${escapeWorkspaceHtml(token)}"><span class="base-word">${escapeWorkspaceHtml(token)}</span><rt class="workspace-ruby-text${emptyClass}">${escapeWorkspaceHtml(meaning)}</rt></ruby>`;
+  }).join("");
 }
 
-function renderExampleItem(page, item, index) {
-  return `
-    <article class="study-card" data-item-id="${escapeWorkspaceHtml(item.id)}">
-      <div class="study-card-head">
-        <span class="study-type-badge">Example</span>
-        ${renderItemActions(page, item, index)}
-      </div>
-      <div class="study-grid example-grid">
-        <label class="study-wide">
-          <span>Ginger sentence</span>
-          <textarea class="workspace-field" data-field="source" rows="2" placeholder="Example sentence...">${escapeWorkspaceHtml(item.source)}</textarea>
-        </label>
-        <label class="study-wide">
-          <span>Translation</span>
-          <textarea class="workspace-field" data-field="translation" rows="2" placeholder="Japanese / English translation...">${escapeWorkspaceHtml(item.translation)}</textarea>
-        </label>
-        <label class="study-wide">
-          <span>Notes</span>
-          <textarea class="workspace-field" data-field="note" rows="2" placeholder="Grammar, interpretation, evidence...">${escapeWorkspaceHtml(item.note)}</textarea>
-        </label>
-      </div>
-    </article>`;
+function renderWordList(page) {
+  const entries = Object.entries(page.words);
+  if (!entries.length) {
+    return `<div class="workspace-empty">文章を追加すると、ここに単語が自動で並ぶよ。</div>`;
+  }
+
+  return entries.map(([word, meaning]) => `
+    <div class="workspace-word-row" data-word="${escapeWorkspaceHtml(word)}">
+      <div class="workspace-word">${escapeWorkspaceHtml(word)}</div>
+      <input
+        class="workspace-meaning-input"
+        type="text"
+        value="${escapeWorkspaceHtml(meaning)}"
+        placeholder="意味"
+        aria-label="${escapeWorkspaceHtml(word)} meaning"
+      />
+    </div>`).join("");
 }
 
-function renderNoteItem(page, item, index) {
-  return `
-    <article class="study-card" data-item-id="${escapeWorkspaceHtml(item.id)}">
-      <div class="study-card-head">
-        <span class="study-type-badge">Note</span>
-        ${renderItemActions(page, item, index)}
+function renderSentenceList(page) {
+  if (!page.sentences.length) {
+    return `<div class="workspace-empty">上の入力欄から文章を追加してね。</div>`;
+  }
+
+  return page.sentences.map((sentence) => `
+    <article class="workspace-sentence-card" data-sentence-id="${escapeWorkspaceHtml(sentence.id)}">
+      <div class="workspace-sentence-display">${renderSentenceHtml(page, sentence.text)}</div>
+      <div class="workspace-sentence-actions">
+        <button type="button" class="edit-sentence">Edit</button>
+        <button type="button" class="delete-sentence danger-button">Delete</button>
       </div>
-      <label class="note-field">
-        <textarea class="workspace-field" data-field="text" rows="5" placeholder="Write anything here...">${escapeWorkspaceHtml(item.text)}</textarea>
-      </label>
-    </article>`;
+    </article>`).join("");
 }
 
-function renderItemActions(page, item, index) {
-  const upDisabled = index === 0 ? " disabled" : "";
-  const downDisabled = index === page.items.length - 1 ? " disabled" : "";
-  return `
-    <div class="study-actions">
-      <button type="button" class="move-item" data-direction="-1"${upDisabled} aria-label="Move up">↑</button>
-      <button type="button" class="move-item" data-direction="1"${downDisabled} aria-label="Move down">↓</button>
-      <button type="button" class="delete-item danger-button">Delete</button>
-    </div>`;
+function updateSentenceRubies(page) {
+  const host = document.getElementById("custom-page-host");
+  if (!host) return;
+  host.querySelectorAll(".workspace-ruby").forEach((ruby) => {
+    const word = ruby.dataset.word;
+    const rt = ruby.querySelector(".workspace-ruby-text");
+    if (!rt) return;
+    const meaning = page.words[word] || "";
+    rt.textContent = meaning;
+    rt.classList.toggle("ruby-empty", !meaning);
+  });
+}
+
+function editSentence(page, sentenceId) {
+  const sentence = page.sentences.find((item) => item.id === sentenceId);
+  if (!sentence) return;
+  const next = window.prompt("Edit sentence", sentence.text);
+  if (next === null) return;
+  const trimmed = next.trim();
+  if (!trimmed) return;
+  updateSentence(page.id, sentenceId, trimmed);
 }
 
 function bindCustomPageEvents(page) {
   const host = document.getElementById("custom-page-host");
   if (!host) return;
 
-  host.querySelectorAll(".workspace-field").forEach((field) => {
-    const card = field.closest(".study-card");
-    field.addEventListener("input", () => {
-      updateItem(page.id, card.dataset.itemId, field.dataset.field, field.value);
+  const form = host.querySelector("#sentence-add-form");
+  const input = host.querySelector("#sentence-input");
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (addSentence(page.id, input?.value || "")) {
+      input.value = "";
+    }
+  });
+
+  host.querySelectorAll(".workspace-meaning-input").forEach((meaningInput) => {
+    const row = meaningInput.closest(".workspace-word-row");
+    meaningInput.addEventListener("input", () => {
+      updateWordMeaning(page.id, row.dataset.word, meaningInput.value);
     });
   });
 
-  host.querySelectorAll(".delete-item").forEach((button) => {
-    const card = button.closest(".study-card");
-    button.addEventListener("click", () => deleteItem(page.id, card.dataset.itemId));
+  host.querySelectorAll(".edit-sentence").forEach((button) => {
+    const card = button.closest(".workspace-sentence-card");
+    button.addEventListener("click", () => editSentence(page, card.dataset.sentenceId));
   });
 
-  host.querySelectorAll(".move-item").forEach((button) => {
-    const card = button.closest(".study-card");
-    button.addEventListener("click", () => {
-      moveItem(page.id, card.dataset.itemId, Number(button.dataset.direction));
-    });
+  host.querySelectorAll(".delete-sentence").forEach((button) => {
+    const card = button.closest(".workspace-sentence-card");
+    button.addEventListener("click", () => deleteSentence(page.id, card.dataset.sentenceId));
   });
 
-  host.querySelector("#add-word-item")?.addEventListener("click", () => addItem(page.id, "word"));
-  host.querySelector("#add-example-item")?.addEventListener("click", () => addItem(page.id, "example"));
-  host.querySelector("#add-note-item")?.addEventListener("click", () => addItem(page.id, "note"));
   host.querySelector("#rename-page")?.addEventListener("click", () => renamePage(page.id));
   host.querySelector("#delete-page")?.addEventListener("click", () => deletePage(page.id));
 }
@@ -280,22 +316,12 @@ function renderCustomPage(page) {
   const host = document.getElementById("custom-page-host");
   if (!host) return;
 
-  const itemsHtml = page.items.length
-    ? page.items
-        .map((item, index) => {
-          if (item.type === "word") return renderWordItem(page, item, index);
-          if (item.type === "example") return renderExampleItem(page, item, index);
-          return renderNoteItem(page, item, index);
-        })
-        .join("")
-    : `<div class="empty-page-state">No items yet. Add a word, example sentence, or note.</div>`;
-
   host.innerHTML = `
     <section class="custom-page-wrapper">
       <header class="custom-page-header">
         <div>
           <h1>${escapeWorkspaceHtml(page.title)}</h1>
-          <p class="sub">A free workspace for your own Ginger notes and examples.</p>
+          <p class="sub">文章から単語を自動抽出して、意味を付けながら読み解くページ。</p>
         </div>
         <div class="page-management-actions">
           <button id="rename-page" type="button">Rename</button>
@@ -303,13 +329,23 @@ function renderCustomPage(page) {
         </div>
       </header>
 
-      <div class="item-add-bar">
-        <button id="add-word-item" type="button">+ Word</button>
-        <button id="add-example-item" type="button">+ Example</button>
-        <button id="add-note-item" type="button">+ Note</button>
-      </div>
+      <div class="workspace-split">
+        <aside class="workspace-words-panel">
+          <div class="workspace-panel-head">
+            <h2>Words</h2>
+            <span>${Object.keys(page.words).length}</span>
+          </div>
+          <div class="workspace-word-list">${renderWordList(page)}</div>
+        </aside>
 
-      <div class="study-card-list">${itemsHtml}</div>
+        <section class="workspace-sentences-panel">
+          <form id="sentence-add-form" class="sentence-add-form">
+            <textarea id="sentence-input" rows="3" placeholder="文章を入力。空白文字ごとに単語へ分解されるよ。"></textarea>
+            <button type="submit">+ Add sentence</button>
+          </form>
+          <div class="workspace-sentence-list">${renderSentenceList(page)}</div>
+        </section>
+      </div>
     </section>`;
 
   bindCustomPageEvents(page);
