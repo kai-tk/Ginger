@@ -1,6 +1,21 @@
 (() => {
+  const WORD_EDGE_PUNCTUATION = /^[.,，．。、()（）]+|[.,，．。、()（）]+$/g;
+
   function stripWordPunctuation(token) {
-    return String(token || "").replace(/[.,]+$/g, "");
+    return String(token || "").replace(WORD_EDGE_PUNCTUATION, "");
+  }
+
+  function splitTokenParts(token) {
+    const text = String(token || "");
+    const word = stripWordPunctuation(text);
+    if (!word) return { prefix: text, word: "", suffix: "" };
+
+    const start = text.indexOf(word);
+    return {
+      prefix: text.slice(0, start),
+      word,
+      suffix: text.slice(start + word.length),
+    };
   }
 
   const originalSplitSentence = splitSentence;
@@ -18,14 +33,13 @@
       if (/^\s+$/.test(token)) return escapeWorkspaceHtml(token);
       if (!token) return "";
 
-      const word = stripWordPunctuation(token);
-      const punctuation = token.slice(word.length);
+      const { prefix, word, suffix } = splitTokenParts(token);
+      if (!word) return escapeWorkspaceHtml(token);
+
       const meaning = page.words[word] || "";
       const emptyClass = meaning ? "" : " ruby-empty";
 
-      if (!word) return escapeWorkspaceHtml(token);
-
-      return `<ruby class="workspace-ruby" data-word="${escapeWorkspaceHtml(word)}"><span class="base-word">${escapeWorkspaceHtml(word)}</span><rt class="workspace-ruby-text${emptyClass}">${escapeWorkspaceHtml(meaning)}</rt></ruby>${escapeWorkspaceHtml(punctuation)}`;
+      return `${escapeWorkspaceHtml(prefix)}<ruby class="workspace-ruby" data-word="${escapeWorkspaceHtml(word)}"><span class="base-word">${escapeWorkspaceHtml(word)}</span><rt class="workspace-ruby-text${emptyClass}">${escapeWorkspaceHtml(meaning)}</rt></ruby>${escapeWorkspaceHtml(suffix)}`;
     }).join("");
   };
 
