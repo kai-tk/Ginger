@@ -145,7 +145,7 @@
 
 .workspace-sentence-display {
   min-height: 1.55rem;
-  line-height: 1.65;
+  line-height: 1.8;
   font-size: 0.92rem;
 }
 
@@ -154,8 +154,8 @@
 }
 
 .workspace-ruby > rt {
-  min-height: 0.78em;
-  font-size: 0.75em;
+  min-height: 1em;
+  font-size: 1em;
   line-height: 1.05;
   padding-top: 0;
 }
