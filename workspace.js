@@ -32,6 +32,10 @@ function normalizePage(page) {
     }
   }
 
+  if (!page.manualWords || typeof page.manualWords !== "object" || Array.isArray(page.manualWords)) {
+    page.manualWords = {};
+  }
+
   page.sentences.forEach((sentence) => {
     splitSentence(sentence.text).forEach((word) => {
       if (!(word in page.words)) page.words[word] = "";
@@ -87,6 +91,7 @@ function addPage() {
     title: `Page ${number}`,
     sentences: [],
     words: {},
+    manualWords: {},
   };
   workspaceState.pages.push(page);
   saveWorkspaceState();
@@ -124,12 +129,26 @@ function syncWordsFromSentences(page) {
   page.sentences.forEach((sentence) => {
     splitSentence(sentence.text).forEach((word) => usedWords.add(word));
   });
+  Object.keys(page.manualWords || {}).forEach((word) => usedWords.add(word));
 
   const nextWords = {};
   usedWords.forEach((word) => {
     nextWords[word] = page.words[word] || "";
   });
   page.words = nextWords;
+}
+
+function addStandaloneWord(pageId, value) {
+  const page = getPage(pageId);
+  const word = String(value || "").trim();
+  if (!page || !word) return false;
+  if (/\s/.test(word)) return false;
+
+  if (!(word in page.words)) page.words[word] = "";
+  page.manualWords[word] = true;
+  saveWorkspaceState();
+  renderActivePage();
+  return true;
 }
 
 function addSentence(pageId, text) {
@@ -221,7 +240,7 @@ function renderSentenceHtml(page, text) {
 function renderWordList(page) {
   const entries = Object.entries(page.words);
   if (!entries.length) {
-    return `<div class="workspace-empty">文章を追加すると、ここに単語が自動で並ぶよ。</div>`;
+    return `<div class="workspace-empty">文章または単語を追加すると、ここに並ぶよ。</div>`;
   }
 
   return entries.map(([word, meaning]) => `
@@ -283,9 +302,7 @@ function bindCustomPageEvents(page) {
   const input = host.querySelector("#sentence-input");
   form?.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (addSentence(page.id, input?.value || "")) {
-      input.value = "";
-    }
+    if (addSentence(page.id, input?.value || "")) input.value = "";
   });
 
   host.querySelectorAll(".workspace-meaning-input").forEach((meaningInput) => {
@@ -326,15 +343,20 @@ function renderCustomPage(page) {
         </div>
       </header>
 
-      <form id="sentence-add-form" class="sentence-add-form sentence-add-form-top">
-        <textarea id="sentence-input" rows="2" placeholder="文章を入力。空白文字ごとに単語へ分解されるよ。"></textarea>
-        <button type="submit">+ Add sentence</button>
-      </form>
+      <section class="sentence-input-section">
+        <div class="workspace-panel-head sentence-input-head">
+          <h2>文章入力</h2>
+        </div>
+        <form id="sentence-add-form" class="sentence-add-form sentence-add-form-top">
+          <textarea id="sentence-input" rows="2" placeholder="文章を入力。空白文字ごとに単語へ分解されるよ。"></textarea>
+          <button type="submit">+ Add sentence</button>
+        </form>
+      </section>
 
       <div class="workspace-split workspace-split-main">
         <aside class="workspace-words-panel">
           <div class="workspace-panel-head">
-            <h2>Words</h2>
+            <h2>単語</h2>
             <span>${Object.keys(page.words).length}</span>
           </div>
           <div class="workspace-word-list">${renderWordList(page)}</div>
@@ -342,7 +364,7 @@ function renderCustomPage(page) {
 
         <section class="workspace-sentences-panel">
           <div class="workspace-panel-head workspace-sentences-head">
-            <h2>Sentences</h2>
+            <h2>文章</h2>
             <span>${page.sentences.length}</span>
           </div>
           <div class="workspace-sentence-list">${renderSentenceList(page)}</div>
