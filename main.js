@@ -22,7 +22,7 @@ const MEANING_FILTER_WORDS = [
 
 let meaningFilterSelected = new Set();
 let translationStatusFilter = "all"; // "all", "filled", "empty"
-let meaningCoverageFilter = "all"; // "all", "80percent", "100percent"
+let meaningCoverageFilter = "all"; // "all", "50percent", "100percent"
 
 function isUpperLike(word) {
   return /^[A-Z0-9]+$/.test(word);
@@ -449,6 +449,7 @@ function applyFilter() {
   const statusFilter = translationStatusFilter;
   const coverageFilter = meaningCoverageFilter;
   const topMeaningText = (document.getElementById("meaning-search")?.value || "").trim().toLowerCase();
+  const translations = collectTranslationsFromInputs();
 
   ENTRIES.forEach((entry) => {
     const row = document.querySelector(`tr[data-entry-id="${entry.id}"]`);
@@ -471,7 +472,7 @@ function applyFilter() {
     if (statusFilter !== "all") {
       const input = row.querySelector(".translation-input");
       const hasText = !!(input && input.value.trim());
-      
+
       if (statusFilter === "filled") {
         passStatus = hasText;
       } else if (statusFilter === "empty") {
@@ -479,51 +480,29 @@ function applyFilter() {
       }
     }
 
-    // Meaning Coverage Filter
+    // Meaning Coverage Filter: percentage of dictionary words in Meaning
+    // whose Translation fields are filled. The row's own Translation does not matter.
     let passCoverage = true;
-    if (coverageFilter !== "all") {
-      const input = row.querySelector(".translation-input");
-      const hasText = !!(input && input.value.trim());
-      
-      if (coverageFilter === "50percent" || coverageFilter === "100percent") {
-        const meaningValue = entry.meaning || "";
-        let percentage = 0;
-        
-        if (meaningValue.length === 0) {
-          // If meaning is empty, coverage is 0%
-          percentage = 0;
-        } else if (hasText) {
-          const translations = collectTranslationsFromInputs();
-          
-          // Count total words in meaning
-          const tokens = meaningValue.split(/(\s+)/);
-          const words = tokens.filter(t => t.trim() && !/^\s+$/.test(t));
-          
-          if (words.length === 0) {
-            percentage = 100;
-          } else {
-            // Count words with Ruby (i.e., words that have translations)
-            let rubyCount = 0;
-            for (const word of words) {
-              const core = word.replace(/^[^\w]+|[^\w]+$/g, "");
-              const entry2 = headwordToEntry[core];
-              if (entry2 && translations[entry2.headword]) {
-                rubyCount++;
-              }
-            }
-            
-            percentage = (rubyCount / words.length) * 100;
-          }
-        } else {
-          // No translation, so 0%
-          percentage = 0;
-        }
-        
-        if (coverageFilter === "50percent") {
-          passCoverage = percentage >= 50;
-        } else if (coverageFilter === "100percent") {
-          passCoverage = percentage >= 100;
-        }
+    if (coverageFilter === "50percent" || coverageFilter === "100percent") {
+      const meaningValue = entry.meaning || "";
+      const words = meaningValue
+        .split(/\s+/)
+        .map((word) => word.replace(/^[^\w]+|[^\w]+$/g, ""))
+        .filter((word) => word && headwordToEntry[word]);
+
+      const translatedCount = words.reduce((count, word) => {
+        const meaningEntry = headwordToEntry[word];
+        return count + (translations[meaningEntry.headword]?.trim() ? 1 : 0);
+      }, 0);
+
+      const percentage = words.length > 0
+        ? (translatedCount / words.length) * 100
+        : 0;
+
+      if (coverageFilter === "50percent") {
+        passCoverage = percentage >= 50;
+      } else {
+        passCoverage = percentage >= 100;
       }
     }
 
