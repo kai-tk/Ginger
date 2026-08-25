@@ -1,0 +1,32 @@
+.workspace-word-row {
+  grid-template-columns: minmax(90px, 0.9fr) minmax(110px, 1.1fr) 28px;
+}
+
+.delete-word-button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: transparent;
+  color: #b91c1c;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.delete-word-button:hover {
+  background: rgba(185, 28, 28, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  .delete-word-button {
+    border-color: #4b5563;
+    color: #fca5a5;
+  }
+
+  .delete-word-button:hover {
+    background: rgba(248, 113, 113, 0.12);
+  }
+}
